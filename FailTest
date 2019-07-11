@@ -1,0 +1,256 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+
+
+namespace Payroll
+{
+    class Program
+    {
+
+        static void Main(String[] args)
+        {
+            string username, password;
+            int passAttempt = 0;
+            Console.Write("\n\nCheck username and password :\n");
+            Console.Write("Default user name and password is : Manager and Y@SH\n");
+            Console.Write("------------------------------------------------------\n");
+
+            do
+            {
+                Console.Write("Input a username: ");
+                username = Console.ReadLine();
+
+                Console.Write("Input a password: ");
+                password = Console.ReadLine();
+
+                if (username != "Manager" || password != "Y@SH")
+                {
+                    Console.WriteLine("Incorrect Username or Password, Try Again");
+                    Console.Clear();
+                    passAttempt++;
+                }
+                else
+                    passAttempt = 1;
+            }
+            while ((username != "Manager" || password != "Y@SH") && (passAttempt != 3));
+
+
+
+            if (passAttempt == 3)
+            {
+                Console.Write("\nIncorrect login attempt three or more times. Go get a Manager!\n\n");
+                System.Environment.Exit(0);
+            }
+            else
+            {
+                Console.Write("\nThe password entered successfully!\n\n");
+                PayrollInterface();
+            }
+
+        }
+        static void PayrollInterface()
+        {
+            Console.WriteLine("");
+            bool stop = false;
+            int runner = 0;
+            int MAX = 10;
+            payrollEntry[] payroll = new payrollEntry[MAX];
+
+            while (!stop)
+            {
+
+                Console.WriteLine("Welcome to the Yash Payroll Interface.\n"
+                    + "Enter which command to use:\n"
+                    + "1) Create new Payroll Entry\n"
+                    + "2) Delete Entry\n"
+                    + "3) Display All Entries\n"
+                    + "4) Search Entries\n"
+                    + "5) Exit Program\n");
+                runner = Int32.Parse(Console.ReadLine());
+                switch (runner)
+                {
+                    case 1: //Create Entry
+                        if (payroll.Length - 1 >= MAX)
+                        {
+                            MAX *= 2;
+                            payrollEntry[] temp = payroll;
+                            payroll = new payrollEntry[MAX];
+                            for (int i = 0; i < MAX; i++)
+                            {
+                                payroll[i] = temp[i];
+                            }
+                        }
+
+                        payroll[payroll.Length - 1] = PayrollInput();
+                        DisplayAll(payroll);
+                        break;
+                    case 2: //Delete Entry
+                        DeleteEntry(payroll);
+                        break;
+                    case 3: //Display all
+
+                        DisplayAll(payroll);
+                        break;
+                    case 4: //search payroll
+                        SearchPayroll(payroll);
+                        break;
+
+
+                    case 5: //exit
+                        stop = false;
+                        Console.WriteLine("Program exiting.");
+                        break;
+
+                    default:
+                        Console.WriteLine("Incorrect Entry, try again.");
+                        break;
+                }
+                Console.ReadLine();
+
+
+            }
+        }
+        private static void SearchPayroll(payrollEntry[] payroll)
+        {
+            payrollEntry found = SearchLName(payroll);
+
+
+
+            if (found == null)
+                Console.WriteLine("Entry not Found");
+            else
+                Console.WriteLine(Display(found));
+        }
+
+
+
+        private static void DeleteEntry(payrollEntry[] payroll)
+        {
+            payrollEntry found = SearchDeleteLName(payroll);
+
+
+
+            if (found == null)
+                Console.WriteLine("Entry not Found");
+            else
+                Console.WriteLine("Deleted: " + Display(found));
+        }
+
+
+
+        private static payrollEntry SearchLName(payrollEntry[] payroll)
+        {
+            payrollEntry found = null;
+            Console.WriteLine("Enter Last Name to search: ");
+            string lname = Console.ReadLine();
+
+
+
+            for (int i = 0; i < payroll.Length; i++)
+            {
+                if (payroll[i].LName == lname)
+                {
+                    found = payroll[i];
+                    break;
+                }
+            }
+
+
+
+            return found;
+        }
+        private static payrollEntry SearchDeleteLName(payrollEntry[] payroll)
+        {
+            payrollEntry found = null;
+            Console.WriteLine("Enter Last Name to search: ");
+            string lname = Console.ReadLine();
+
+
+
+            for (int i = 0; i < payroll.Length; i++)
+            {
+                if (payroll[i].LName == lname)
+                {
+                    found = payroll[i];
+                    for (int x = i; x < payroll.Length; x++)
+                    {
+                        payroll[x] = payroll[x + 1];
+                    }
+                    payroll[payroll.Length - 1] = null;
+                    break;
+                }
+            }
+            return found;
+        }
+
+        private static payrollEntry PayrollInput()
+        {
+            Console.WriteLine("Enter First Name: ");
+            string Fname = Console.ReadLine();
+            Console.WriteLine("Enter LastName: ");
+            string Lname = Console.ReadLine();
+            Console.WriteLine("Enter Salary: ");
+            double salary = Double.Parse(Console.ReadLine());
+            DateTime hiredate;
+            Console.WriteLine("Enter Hire Date: ");
+            String tempDate = Console.ReadLine();
+            bool valid = false;
+            do
+            {
+                if (DateTime.TryParse(tempDate, out hiredate))
+                {
+                    valid = true;
+                    hiredate = DateTime.Parse(tempDate);
+                }
+                else
+                {
+                    Console.WriteLine("Date not valid, enter again: ");
+                    tempDate = Console.ReadLine();
+                    valid = false;
+                }
+            } while (!valid);
+            payrollEntry newEntry = new payrollEntry
+            {
+                FName = Fname,
+                LName = Lname,
+                Salary = salary,
+                HireDate = hiredate
+            };
+            Console.WriteLine(newEntry.FName);
+            return newEntry;
+        }
+
+
+
+        private static void DisplayAll(payrollEntry[] payroll)
+        {
+            for (int i = 0; i < payroll.Length; i++)
+            {
+                string currentItem = Display(payroll[i]);
+                Console.WriteLine(currentItem);
+            }
+            Console.ReadLine();
+        }
+        public static string Display(payrollEntry payroll)
+        {
+            string display = "Name: " + payroll.LName + ", " + payroll.FName
+                + "\nSalary: " + payroll.Salary
+                + "\nHire Date: " + "" + payroll.HireDate;
+            return display;
+        }
+    }
+
+    class payrollEntry
+    {
+
+        public string FName { get; set; }
+        public string LName { get; set; }
+        public double Salary { get; set; }
+        public DateTime HireDate { get; set; }
+
+    }
+}
